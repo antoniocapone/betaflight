@@ -1157,6 +1157,30 @@ static bool mspProcessOutCommand(mspDescriptor_t srcDesc, int16_t cmdMSP, sbuf_t
         break;
     }
 
+    case MSP_RAW_IMU_ATTITUDE: {
+        for (int i = 0; i < 3; i++) {
+#if defined(USE_ACC)
+            sbufWriteU16(dst, lrintf(acc.accADC.v[i]));
+#else
+            sbufWriteU16(dst, 0);
+#endif
+        }
+        for (int i = 0; i < 3; i++) {
+            sbufWriteU16(dst, gyroRateDps(i));
+        }
+        for (int i = 0; i < 3; i++) {
+#if defined(USE_MAG)
+            sbufWriteU16(dst, lrintf(mag.magADC.v[i]));
+#else
+            sbufWriteU16(dst, 0);
+#endif
+        }
+        sbufWriteU16(dst, attitude.values.roll);
+        sbufWriteU16(dst, attitude.values.pitch);
+        sbufWriteU16(dst, DECIDEGREES_TO_DEGREES(attitude.values.yaw));
+        break;
+    }
+
 case MSP_NAME:
         sbufWriteString(dst, pilotConfig()->craftName);
         break;
